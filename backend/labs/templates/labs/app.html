@@ -1,0 +1,119 @@
+{% extends "labs/base.html" %}
+{% load i18n %}
+
+{% block extra_head %}
+<script>
+  document.addEventListener('alpine:init', () => {
+    Alpine.store('aiPanel', {
+      open: false,
+      setOpen(value) { this.open = value },
+    })
+    Alpine.store('confirm', {
+      open: false,
+      message: '',
+      _callback: null,
+      ask(message, callback) {
+        this.message = message
+        this._callback = callback
+        this.open = true
+      },
+      accept() { this.open = false; if (this._callback) this._callback() },
+      cancel() { this.open = false },
+    })
+    localStorage.removeItem('aiPanelOpen')
+  })
+</script>
+
+<style>
+  [x-cloak] { display: none !important; }
+  * { -webkit-tap-highlight-color: transparent; }
+  img { -webkit-user-drag: none; user-select: none; pointer-events: none; }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background-color: #F2F2F7;
+    -webkit-font-smoothing: antialiased;
+  }
+  .card {
+    background: #FFFFFF;
+    border-radius: 16px;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.04), 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .row-sep { border-top: 1px solid #F2F2F7; }
+  .field {
+    background: #FFFFFF;
+    border: 1.5px solid #E5E5EA;
+    border-radius: 10px;
+    padding: .6rem .85rem;
+    font-size: .9rem;
+    width: 100%;
+    outline: none;
+    color: #1C1C1E;
+    transition: border-color .15s;
+    font-family: 'Inter', sans-serif;
+  }
+  .field:focus { border-color: #007AFF; box-shadow: 0 0 0 3px rgba(0,122,255,.12); }
+  .field::placeholder { color: #AEAEB2; }
+  .btn-primary {
+    background: #007AFF;
+    color: white;
+    font-weight: 600;
+    font-size: .9rem;
+    padding: .75rem 1.5rem;
+    border-radius: 12px;
+    transition: opacity .15s, transform .1s;
+    display: inline-flex; align-items: center; gap: .5rem;
+    cursor: pointer;
+  }
+  .btn-primary:active { opacity: .8; transform: scale(.97); }
+  .badge-normal     { background:#E8F8ED; color:#1A7F37; }
+  .badge-borderline { background:#FFF4E0; color:#B45309; }
+  .badge-low, .badge-high { background:#FFEBE9; color:#C0392B; }
+  .badge-unknown    { background:#F0F0F5; color:#8E8E93; }
+  @keyframes slideUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+  .page-enter { animation: slideUp .25s ease-out; }
+  ::-webkit-scrollbar { display: none; }
+</style>
+{% endblock %}
+
+{% block body %}
+
+  <main class="max-w-app mx-auto px-4 md:px-6 pt-2 md:pt-6 pb-10 min-h-screen page-enter">
+    {% block content %}{% endblock %}
+  </main>
+
+  {% include 'labs/ai_chat.html' %}
+
+  <!-- Global confirm modal -->
+  <div x-cloak x-show="$store.confirm.open"
+       x-transition:enter="transition ease-out duration-150"
+       x-transition:enter-start="opacity-0"
+       x-transition:enter-end="opacity-100"
+       x-transition:leave="transition ease-in duration-100"
+       x-transition:leave-start="opacity-100"
+       x-transition:leave-end="opacity-0"
+       class="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-4 bg-black/30">
+    <div x-show="$store.confirm.open"
+         x-transition:enter="transition ease-out duration-150"
+         x-transition:enter-start="opacity-0 scale-95 translate-y-2"
+         x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+         x-transition:leave="transition ease-in duration-100"
+         x-transition:leave-start="opacity-100 scale-100"
+         x-transition:leave-end="opacity-0 scale-95"
+         class="w-full max-w-sm card px-5 py-5 space-y-4">
+      <p class="text-[15px] text-[#1C1C1E] leading-snug" x-text="$store.confirm.message"></p>
+      <div class="flex gap-2.5">
+        <button @click="$store.confirm.cancel()"
+                class="flex-1 h-11 rounded-2xl border border-[#D9D9DC] bg-[#F7F7F8]
+                       text-[14px] font-semibold text-[#52525B] active:opacity-70 transition cursor-pointer">
+          {% trans "Cancel" %}
+        </button>
+        <button @click="$store.confirm.accept()"
+                class="flex-1 h-11 rounded-2xl bg-[#FF3B30]
+                       text-[14px] font-semibold text-white active:opacity-70 transition cursor-pointer">
+          {% trans "Confirm" %}
+        </button>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}

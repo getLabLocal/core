@@ -9,6 +9,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     UV_LINK_MODE=copy \
     PATH="/app/.venv/bin:$PATH"
 
+RUN apt-get update && apt-get install -y --no-install-recommends gettext && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
 # Instalar dependencias (capa cacheada — solo se reconstruye si cambia pyproject.toml/uv.lock)
@@ -18,7 +20,7 @@ RUN uv sync --frozen --no-dev
 # Copiar código fuente
 COPY . .
 
-RUN chmod +x entrypoint.sh && mkdir -p /app/data /app/staticfiles
+RUN chmod +x entrypoint.sh && mkdir -p /app/data /app/staticfiles && python manage.py compilemessages
 
 EXPOSE 8000
 

@@ -64,10 +64,10 @@ echo ""
 echo "→ Waiting for the container to be ready..."
 sleep 5
 
-SUPERUSER_EXISTS=$(docker compose -f ./backend/docker-compose.yml exec -T web \
-  python manage.py shell -c "from django.contrib.auth import get_user_model; print(get_user_model().objects.filter(is_superuser=True).exists())" 2>/dev/null)
-
-if [ "$SUPERUSER_EXISTS" = "True" ]; then
+if docker compose -f ./backend/docker-compose.yml exec -T web \
+  python manage.py shell -c \
+  "import sys; from django.contrib.auth import get_user_model; sys.exit(0 if get_user_model().objects.filter(is_superuser=True).exists() else 1)" \
+  >/dev/null 2>&1; then
   echo "${YELLOW}→ An admin user already exists, skipping creation.${RESET}"
 else
   echo "→ Creating admin user..."

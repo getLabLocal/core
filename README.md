@@ -22,9 +22,10 @@ That's it.
 ## Install
 
 ```bash
-git clone https://github.com/getLabLocal/core
+mkdir lablocal
 cd lablocal
-sh install.sh
+git clone https://github.com/getLabLocal/core
+sh core/install.sh
 ```
 
 The installer will:

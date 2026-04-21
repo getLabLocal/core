@@ -3,6 +3,14 @@ set -e
 
 cd "$(dirname "$0")"
 
+cleanup() {
+  echo ""
+  echo "→ Stopping LabLocal..."
+  docker compose -f ./backend/docker-compose.yml down
+  exit 1
+}
+trap cleanup INT TERM
+
 BOLD='\033[1m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
